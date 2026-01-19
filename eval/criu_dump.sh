@@ -2,13 +2,10 @@
 # Available functions: ['graph', 'float_operation', 'chameleon', 'json_dumps_loads', 'linpack', 'matmul', 'pyaes', 'translator', 'web_service']
 # ================= 配置区域 =================
 ITERATIONS=10
-# 加上 -u 防止 python 输出缓冲
-APP_CMD="sudo -u ywenzhe numactl --cpunodebind=4 --membind=4 python3 -u /home/ywenzhe/benchmark/faas_runner.py translator"
+FUNCTIONS=('graph' 'float_operation' 'chameleon' 'json_dumps_loads' 'linpack' 'matmul' 'pyaes' 'translator' 'web_service')
 
 CRIU_BIN="/home/ywenzhe/CRIU/rcriu/criu/criu"
 IMG_DIR="/mnt/tmp"
-
-RESULT_CSV="dump_fs_translator.csv"
 
 # Dump 阶段关注的指标
 DUMP_KEYS=(
@@ -27,10 +24,19 @@ DUMP_KEYS=(
 if [ "$EUID" -ne 0 ]; then echo "请使用 sudo 运行此脚本"; exit 1; fi
 mkdir -p "$IMG_DIR"
 
-# 初始化 CSV
-HEADER="Iteration"
-for key in "${DUMP_KEYS[@]}"; do HEADER="$HEADER,$key(us)"; done
-echo "$HEADER" > "$RESULT_CSV"
+# ================= 主循环：遍历所有函数 =================
+for FUNC in "${FUNCTIONS[@]}"; do
+    echo "=========================================="
+    echo "开始测试函数: $FUNC"
+    echo "=========================================="
+
+    APP_CMD="sudo -u ywenzhe numactl --cpunodebind=4 --membind=4 python3 -u /home/ywenzhe/benchmark/faas_runner.py $FUNC"
+    RESULT_CSV="dump_fs_${FUNC}.csv"
+
+    # 初始化 CSV
+    HEADER="Iteration"
+    for key in "${DUMP_KEYS[@]}"; do HEADER="$HEADER,$key(us)"; done
+    echo "$HEADER" > "$RESULT_CSV"
 
 extract_value() {
     local key="$1"
@@ -95,28 +101,35 @@ for ((i=1; i<=ITERATIONS; i++)); do
     sleep 2
 done
 
-# ================= 计算平均值并写入 CSV =================
-echo "------------------------------------------------"
-echo "正在计算平均值并写入 $RESULT_CSV ..."
+    # ================= 计算平均值并写入 CSV =================
+    echo "------------------------------------------------"
+    echo "正在计算平均值并写入 $RESULT_CSV ..."
 
-# 使用 awk 计算平均值，并追加到 CSV 文件末尾
-awk -F',' '
-    NR==1 { next } # 跳过标题行
-    { 
-        # 累加每一列 (从第2列开始)
-        for(i=2; i<=NF; i++) sum[i]+=$i 
-        count++ 
-    }
-    END {
-        if (count > 0) {
-            printf "Average" # 第一列显示 Average
-            for(i=2; i<=NF; i++) {
-                printf ",%.2f", sum[i]/count # 计算并打印平均值
-            }
-            printf "\n"
+    # 使用 awk 计算平均值，并追加到 CSV 文件末尾
+    awk -F',' '
+        NR==1 { next } # 跳过标题行
+        {
+            # 累加每一列 (从第2列开始)
+            for(i=2; i<=NF; i++) sum[i]+=$i
+            count++
         }
-    }
-' "$RESULT_CSV" >> "$RESULT_CSV"
+        END {
+            if (count > 0) {
+                printf "Average" # 第一列显示 Average
+                for(i=2; i<=NF; i++) {
+                    printf ",%.2f", sum[i]/count # 计算并打印平均值
+                }
+                printf "\n"
+            }
+        }
+    ' "$RESULT_CSV" >> "$RESULT_CSV"
 
-echo "完成。最后一行数据如下："
-tail -n 1 "$RESULT_CSV"
+    echo "完成 $FUNC 测试。最后一行数据如下："
+    tail -n 1 "$RESULT_CSV"
+    echo ""
+    sleep 10
+done
+
+echo "=========================================="
+echo "所有函数测试完成！"
+echo "=========================================="

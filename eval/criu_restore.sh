@@ -2,11 +2,10 @@
 # Available functions: ['graph', 'float_operation', 'chameleon', 'json_dumps_loads', 'linpack', 'matmul', 'pyaes', 'translator', 'web_service']
 # ================= 配置区域 =================
 ITERATIONS=10
-APP_CMD="sudo -u ywenzhe numactl --cpunodebind=4 --membind=4 python3 -u /home/ywenzhe/benchmark/faas_runner.py float_operation"
+FUNCTIONS=('graph' 'float_operation' 'chameleon' 'json_dumps_loads' 'linpack' 'matmul' 'pyaes' 'translator' 'web_service')
 
 CRIU_BIN="/home/ywenzhe/CRIU/rcriu/criu/criu"
 IMG_DIR="/mnt/tmp"
-RESULT_CSV="restore_fs_float.csv"
 
 # Restore 阶段关注的指标
 RESTORE_KEYS=(
@@ -31,10 +30,19 @@ RESTORE_KEYS=(
 if [ "$EUID" -ne 0 ]; then echo "请使用 sudo 运行此脚本"; exit 1; fi
 mkdir -p "$IMG_DIR"
 
-# 初始化 CSV
-HEADER="Iteration"
-for key in "${RESTORE_KEYS[@]}"; do HEADER="$HEADER,$key(us)"; done
-echo "$HEADER" > "$RESULT_CSV"
+# ================= 主循环：遍历所有函数 =================
+for FUNC in "${FUNCTIONS[@]}"; do
+    echo "=========================================="
+    echo "开始测试函数: $FUNC"
+    echo "=========================================="
+
+    APP_CMD="sudo -u ywenzhe numactl --cpunodebind=4 --membind=4 python3 -u /home/ywenzhe/benchmark/faas_runner.py $FUNC"
+    RESULT_CSV="restore_fs_${FUNC}.csv"
+
+    # 初始化 CSV
+    HEADER="Iteration"
+    for key in "${RESTORE_KEYS[@]}"; do HEADER="$HEADER,$key(us)"; done
+    echo "$HEADER" > "$RESULT_CSV"
 
 extract_value() {
     local key="$1"
@@ -88,67 +96,74 @@ perform_initial_dump() {
     sleep 1
 }
 
-# ================= 清空旧镜像重新生成 =================
-sudo rm -rf "$IMG_DIR"/*
-perform_initial_dump
+    # ================= 清空旧镜像重新生成 =================
+    sudo rm -rf "$IMG_DIR"/*
+    perform_initial_dump
 
-echo "========== 开始 Restore 性能测试 (共 $ITERATIONS 轮) =========="
+    echo "========== 开始 Restore 性能测试 (共 $ITERATIONS 轮) =========="
 
-for ((i=1; i<=ITERATIONS; i++)); do
-    echo -n "Round $i: "
-    
-    # 1. 执行 Restore
-    echo -n "Restoring... "
-    numactl --cpunodebind=4 --membind=4 $CRIU_BIN restore -D "$IMG_DIR" --shell-job -vvv -o /home/ywenzhe/benchmark/restore.log --display-stats --restore-detached > restore_stats.tmp 2>&1
-    
-    if [ $? -ne 0 ]; then
-        echo "Restore 失败! 查看 restore_stats.tmp"
-        cat restore_stats.tmp
-        exit 1
-    fi
+    for ((i=1; i<=ITERATIONS; i++)); do
+        echo -n "Round $i: "
 
-    # 2. 数据采集
-    ROW="$i"
-    for key in "${RESTORE_KEYS[@]}"; do
-        val=$(extract_value "$key" restore_stats.tmp)
-        ROW="$ROW,${val:-0}"
+        # 1. 执行 Restore
+        echo -n "Restoring... "
+        numactl --cpunodebind=4 --membind=4 $CRIU_BIN restore -D "$IMG_DIR" --shell-job -vvv -o /home/ywenzhe/benchmark/restore.log --display-stats --restore-detached > restore_stats.tmp 2>&1
+
+        if [ $? -ne 0 ]; then
+            echo "Restore 失败! 查看 restore_stats.tmp"
+            cat restore_stats.tmp
+            exit 1
+        fi
+
+        # 2. 数据采集
+        ROW="$i"
+        for key in "${RESTORE_KEYS[@]}"; do
+            val=$(extract_value "$key" restore_stats.tmp)
+            ROW="$ROW,${val:-0}"
+        done
+        echo "$ROW" >> "$RESULT_CSV"
+
+        # 3. 清理刚刚恢复的进程
+        RESTORED_PID=$(pgrep -f "faas_runner.py" | head -n 1)
+        if [ -n "$RESTORED_PID" ]; then
+            kill -9 "$RESTORED_PID"
+            echo "Done (PID $RESTORED_PID killed)."
+        else
+            echo "Done."
+        fi
+
+        rm -f restore_stats.tmp
+        sync; echo 3 > /proc/sys/vm/drop_caches
+        sleep 2
     done
-    echo "$ROW" >> "$RESULT_CSV"
-    
-    # 3. 清理刚刚恢复的进程
-    RESTORED_PID=$(pgrep -f "faas_runner.py" | head -n 1)
-    if [ -n "$RESTORED_PID" ]; then
-        kill -9 "$RESTORED_PID"
-        echo "Done (PID $RESTORED_PID killed)."
-    else
-        echo "Done."
-    fi
 
-    rm -f restore_stats.tmp
-    sync; echo 3 > /proc/sys/vm/drop_caches
-    sleep 2
+    # ================= 计算平均值并写入 CSV =================
+    echo "------------------------------------------------"
+    echo "正在计算平均值并写入 $RESULT_CSV ..."
+
+    awk -F',' '
+        NR==1 { next }
+        {
+            for(i=2; i<=NF; i++) sum[i]+=$i
+            count++
+        }
+        END {
+            if (count > 0) {
+                printf "Average"
+                for(i=2; i<=NF; i++) {
+                    printf ",%.2f", sum[i]/count
+                }
+                printf "\n"
+            }
+        }
+    ' "$RESULT_CSV" >> "$RESULT_CSV"
+
+    echo "完成 $FUNC 测试。最后一行数据如下："
+    tail -n 1 "$RESULT_CSV"
+    echo ""
+    sleep 10
 done
 
-# ================= 计算平均值并写入 CSV =================
-echo "------------------------------------------------"
-echo "正在计算平均值并写入 $RESULT_CSV ..."
-
-awk -F',' '
-    NR==1 { next }
-    { 
-        for(i=2; i<=NF; i++) sum[i]+=$i 
-        count++ 
-    }
-    END {
-        if (count > 0) {
-            printf "Average"
-            for(i=2; i<=NF; i++) {
-                printf ",%.2f", sum[i]/count
-            }
-            printf "\n"
-        }
-    }
-' "$RESULT_CSV" >> "$RESULT_CSV"
-
-echo "完成。最后一行数据如下："
-tail -n 1 "$RESULT_CSV"
+echo "=========================================="
+echo "所有函数测试完成！"
+echo "=========================================="
