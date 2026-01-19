@@ -1,0 +1,6 @@
+Round,Freezing time,Frozen time,Memory dump time,Memory write time,CXL write time,Disk write time,CPU dump time,VMA dump time,Pagemap dump time,IRMAP resolve time
+1,204,26670,14101,12459,0,12226,562,106,217,0
+2,245,26534,14206,12509,0,12285,498,91,210,0
+3,238,26868,13756,12109,0,11880,588,92,221,0
+4,177,27593,13884,12104,0,11882,652,91,210,0
+Average,216.00,26916.25,13986.75,12295.25,0.00,12068.25,575.00,95.00,214.50,0.00

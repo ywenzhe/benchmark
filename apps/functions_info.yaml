@@ -1,0 +1,80 @@
+# FunctionBench 测试应用配置信息
+
+apps:
+  graph:
+    name: "Graph BFS"
+    description: "图的广度优先搜索算法"
+    workload_type: "compute"
+    memory_intensive: true
+
+  float_operation:
+    name: "Float Operations"
+    description: "浮点数运算密集型测试"
+    workload_type: "compute"
+    memory_intensive: false
+
+  chameleon:
+    name: "Chameleon"
+    description: "HTML 模板渲染"
+    workload_type: "io"
+    memory_intensive: false
+
+  json_dumps_loads:
+    name: "JSON Serialization"
+    description: "JSON 序列化和反序列化"
+    workload_type: "compute"
+    memory_intensive: false
+
+  linpack:
+    name: "Linpack"
+    description: "线性代数运算基准测试"
+    workload_type: "compute"
+    memory_intensive: true
+
+  matmul:
+    name: "Matrix Multiplication"
+    description: "矩阵乘法运算"
+    workload_type: "compute"
+    memory_intensive: true
+
+  pyaes:
+    name: "PyAES Encryption"
+    description: "AES 加密算法"
+    workload_type: "compute"
+    memory_intensive: false
+
+  translator:
+    name: "Translator"
+    description: "文本翻译服务"
+    workload_type: "io"
+    memory_intensive: false
+
+  web_service:
+    name: "Web Service"
+    description: "Web 服务模拟"
+    workload_type: "io"
+    memory_intensive: false
+
+# Fork 类型配置
+fork_types:
+  localfork:
+    description: "本地 fork，数据在本地内存"
+    use_cxl: false
+
+  cxlfork:
+    description: "CXL fork，数据在 CXL 内存"
+    use_cxl: true
+
+# 测试指标说明
+metrics:
+  restore_time:
+    description: "从 checkpoint 恢复所需的时间"
+    unit: "seconds"
+
+  page_faults_time:
+    description: "页面错误处理时间"
+    unit: "seconds"
+
+  execution_time:
+    description: "恢复后执行负载的时间"
+    unit: "seconds"

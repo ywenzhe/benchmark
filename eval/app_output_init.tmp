@@ -1,0 +1,11 @@
+当前进程的PID是: 2365244
+Loading function: float_operation...
+Function 'float_operation' loaded successfully.
+Starting FaaS Runner on port 12345...
+ * Serving Flask app 'faas_runner'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:12345
+ * Running on http://100.100.30.195:12345
+Press CTRL+C to quit

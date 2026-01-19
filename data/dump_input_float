@@ -1,0 +1,127 @@
+Displaying dump stats:
+Freezing time: 204 us
+Frozen time: 26670 us
+Memory dump time: 14101 us
+Memory write time: 12459 us
+CXL write time: 0 us
+Disk write time: 12226 us
+CPU dump time: 562 us
+VMA dump time: 106 us
+Pagemap dump time: 217 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 245 us
+Frozen time: 26534 us
+Memory dump time: 14206 us
+Memory write time: 12509 us
+CXL write time: 0 us
+Disk write time: 12285 us
+CPU dump time: 498 us
+VMA dump time: 91 us
+Pagemap dump time: 210 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 238 us
+Frozen time: 26868 us
+Memory dump time: 13756 us
+Memory write time: 12109 us
+CXL write time: 0 us
+Disk write time: 11880 us
+CPU dump time: 588 us
+VMA dump time: 92 us
+Pagemap dump time: 221 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 177 us
+Frozen time: 27593 us
+Memory dump time: 13884 us
+Memory write time: 12104 us
+CXL write time: 0 us
+Disk write time: 11882 us
+CPU dump time: 652 us
+VMA dump time: 91 us
+Pagemap dump time: 210 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 186 us
+Frozen time: 27689 us
+Memory dump time: 14405 us
+Memory write time: 12642 us
+CXL write time: 0 us
+Disk write time: 12428 us
+CPU dump time: 586 us
+VMA dump time: 85 us
+Pagemap dump time: 204 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 343 us
+Frozen time: 26961 us
+Memory dump time: 13947 us
+Memory write time: 12295 us
+CXL write time: 0 us
+Disk write time: 12066 us
+CPU dump time: 583 us
+VMA dump time: 88 us
+Pagemap dump time: 217 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 153 us
+Frozen time: 27152 us
+Memory dump time: 13945 us
+Memory write time: 12270 us
+CXL write time: 0 us
+Disk write time: 12039 us
+CPU dump time: 556 us
+VMA dump time: 87 us
+Pagemap dump time: 218 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
+
+Displaying dump stats:
+Freezing time: 107 us
+Frozen time: 26808 us
+Memory dump time: 13702 us
+Memory write time: 12021 us
+CXL write time: 0 us
+Disk write time: 11800 us
+CPU dump time: 592 us
+VMA dump time: 89 us
+Pagemap dump time: 212 us
+IRMAP resolve time: 0 us
+Memory pages scanned: 5001 (0x1389)
+Memory pages skipped from parent: 0 (0x0)
+Memory pages written: 4860 (0x12fc)
+Lazy memory pages: 0 (0x0)
